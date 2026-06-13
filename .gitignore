@@ -1,6 +1,16 @@
-node_modules/
-backend/venv/
+# Python
+venv/
+.venv/
+
+# Demucs outputs
+backend/separated/
+
+# Uploaded audio files
+backend/uploads/
+
+# Python cache
 __pycache__/
+*.pyc
+
+# Environment files
 .env
-dist/
-build/
