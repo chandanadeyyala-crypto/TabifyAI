@@ -1,4 +1,5 @@
 import React from "react";
+import { jsPDF } from "jspdf";
 
 function Results({
   setScreen,
@@ -6,25 +7,27 @@ function Results({
   setAudioFile,
   audioFile
 }) {
+  const downloadPDF = () => {
+    const doc = new jsPDF();
 
-  const downloadTabs = () => {
-    const blob = new Blob([tabs], {
-      type: "text/plain"
-    });
+    doc.setFont("courier");
+    doc.setFontSize(12);
 
-    const url = URL.createObjectURL(blob);
+    doc.text("TabifyAI Generated Guitar Tabs", 10, 15);
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tabifyai-tabs.txt";
-    a.click();
+    if (audioFile?.name) {
+      doc.text(`File: ${audioFile.name}`, 10, 25);
+    }
 
-    URL.revokeObjectURL(url);
+    const lines = tabs.split("\n");
+
+    doc.text(lines, 10, 40);
+
+    doc.save("TabifyAI-Tabs.pdf");
   };
 
   return (
     <div>
-
       <h2>Generated Guitar Tabs</h2>
 
       <p>
@@ -44,8 +47,8 @@ function Results({
         {tabs}
       </pre>
 
-      <button onClick={downloadTabs}>
-        Download Tabs
+      <button onClick={downloadPDF}>
+        Download PDF
       </button>
 
       <button
@@ -56,7 +59,6 @@ function Results({
       >
         Upload Another File
       </button>
-
     </div>
   );
 }

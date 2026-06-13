@@ -15,16 +15,20 @@ function Loading({ setScreen, setTabs, audioFile }) {
   };
 
   useEffect(() => {
-    const progressTimer = setInterval(async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/progress");
-        const data = await res.json();
+    const progressTimer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev < 20) {
+          setMessage("Uploading audio...");
+          return prev + 5;
+        }
 
-        setProgress(data.progress);
-        setMessage(data.message);
-      } catch (err) {
-        console.log("Progress error:", err);
-      }
+        if (prev < 80) {
+          setMessage("Running Demucs AI separation...");
+          return prev + 2;
+        }
+
+        return prev;
+      });
     }, 1000);
 
     const uploadToBackend = async () => {
@@ -32,12 +36,18 @@ function Loading({ setScreen, setTabs, audioFile }) {
         const formData = new FormData();
         formData.append("file", audioFile);
 
+        setProgress(10);
+        setMessage("Uploading audio...");
+
         const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
           method: "POST",
           body: formData,
         });
 
         const uploadData = await uploadRes.json();
+
+        setProgress(80);
+        setMessage("Extracting guitar stem...");
 
         const tabRes = await fetch(
           `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
@@ -48,6 +58,9 @@ function Loading({ setScreen, setTabs, audioFile }) {
           }
         );
 
+        setProgress(90);
+        setMessage("Generating guitar tabs...");
+
         const tabData = await tabRes.json();
 
         setTabs(tabData.tabs || "");
@@ -57,7 +70,6 @@ function Loading({ setScreen, setTabs, audioFile }) {
         setTimeout(() => {
           setScreen("results");
         }, 1000);
-
       } catch (err) {
         console.log(err);
         alert("Something went wrong");
