@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 function Loading({ setScreen, setTabs, audioFile }) {
-  const loadingSteps = [
-    "Uploading audio...",
-    "Running Demucs AI separation...",
-    "Extracting guitar stem...",
-    "Detecting notes...",
-    "Generating guitar tabs..."
-  ];
-
-  const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Starting...");
 
   const renderBar = (progress) => {
     const totalBlocks = 10;
@@ -23,7 +15,18 @@ function Loading({ setScreen, setTabs, audioFile }) {
   };
 
   useEffect(() => {
-    console.log("Current loading step:", loadingSteps[currentStep]);
+    const progressTimer = setInterval(async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/progress");
+        const data = await res.json();
+
+        setProgress(data.progress);
+        setMessage(data.message);
+      } catch (err) {
+        console.log("Progress error:", err);
+      }
+    }, 1000);
+
     const uploadToBackend = async () => {
       try {
         const formData = new FormData();
@@ -35,9 +38,6 @@ function Loading({ setScreen, setTabs, audioFile }) {
         });
 
         const uploadData = await uploadRes.json();
-        console.log("Upload:", uploadData);
-
-        setCurrentStep(2);
 
         const tabRes = await fetch(
           `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
@@ -48,14 +48,15 @@ function Loading({ setScreen, setTabs, audioFile }) {
           }
         );
 
-        setCurrentStep(4);
-
         const tabData = await tabRes.json();
-        console.log("Tabs:", tabData);
 
-        setProgress(100);
         setTabs(tabData.tabs || "");
-        setScreen("results");
+        setProgress(100);
+        setMessage("Done!");
+
+        setTimeout(() => {
+          setScreen("results");
+        }, 1000);
 
       } catch (err) {
         console.log(err);
@@ -64,41 +65,22 @@ function Loading({ setScreen, setTabs, audioFile }) {
       }
     };
 
-    const progressTimer = setInterval(() => {
-      setProgress((prev) => Math.min(prev + 5, 95));
-    }, 1000);
-
-    const stepTimer = setInterval(() => {
-      setCurrentStep((prev) =>
-        Math.min(prev + 1, loadingSteps.length - 1)
-      );
-    }, 4000);
-
     uploadToBackend();
 
     return () => {
       clearInterval(progressTimer);
-      clearInterval(stepTimer);
     };
   }, []);
 
-  console.log("Current step number:", currentStep);
-console.log("Current step text:", loadingSteps[currentStep]);
+  return (
+    <div>
+      <h1>Analyzing your audio...</h1>
 
-return (
-  <div>
-    <h1>Analyzing your audio...</h1>
+      <p>{renderBar(progress)} {progress}%</p>
 
-    <p>{renderBar(progress)} {progress}%</p>
-
-    <h3>
-      {progress < 20 && "Uploading audio..."}
-      {progress >= 20 && progress < 50 && "Running Demucs AI separation..."}
-      {progress >= 50 && progress < 70 && "Extracting guitar stem..."}
-      {progress >= 70 && progress < 90 && "Detecting notes..."}
-      {progress >= 90 && "Generating guitar tabs..."}
-    </h3>
-  </div>
-);
+      <h3>{message}</h3>
+    </div>
+  );
 }
-export default Loading;     
+
+export default Loading;
