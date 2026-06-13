@@ -11,14 +11,15 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-UPLOAD_FOLDER = "uploads"
 
+UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
@@ -38,15 +39,11 @@ async def upload_song(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     subprocess.run(
-        [
-            "demucs",
-            file_path
-        ],
-        shell=True
+        ["demucs", file_path],
+        check=True
     )
 
     song_name = file.filename.rsplit(".", 1)[0]
-
     guitar_path = f"separated/htdemucs/{song_name}/other.wav"
 
     return {
