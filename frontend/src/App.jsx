@@ -11,8 +11,8 @@ function App() {
   const [audioFile, setAudioFile] = useState(null);
 console.log("Current screen:", screen);
   return (
-    <div>
-      <Navbar title="TabifyAI" />
+    <div className= "card">
+      <Navbar title="TabifyAI" className="navbar" />
 
       {screen === "upload" && (
         <Upload
