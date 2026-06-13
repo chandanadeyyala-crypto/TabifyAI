@@ -50,18 +50,19 @@ return (
       <div className="drop-center">
         <span>{file ? file.name : "Drop your file in this box"}</span>
       </div>
-
-      <div className="file-controls">
-        <label className="choose-file-btn">
-          Choose File
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => handleFile(e.target.files[0])}
-            hidden
-          />
-        </label>
-      </div>
+ <div className="file-controls">
+  {!file && (
+    <label className="choose-file-btn">
+      Choose File
+      <input
+        type="file"
+        accept="audio/*"
+        onChange={(e) => handleFile(e.target.files[0])}
+        hidden
+      />
+    </label>
+  )}
+</div>
     </div>
 
     <button onClick={uploadFile} className="upload-button">

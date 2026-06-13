@@ -12,7 +12,7 @@ function App() {
 console.log("Current screen:", screen);
   return (
     <div className= "card">
-      <Navbar title="TabifyAI" className="navbar" />
+      <Navbar title="TabifyAI" />
 
       {screen === "upload" && (
         <Upload

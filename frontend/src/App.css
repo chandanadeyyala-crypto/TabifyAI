@@ -3,7 +3,9 @@ body{
     min-height: 100vh;
     background: linear-gradient(to bottom, #160820, #3e0486);
     color :white;
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }
 
 @font-face {
@@ -12,40 +14,68 @@ body{
 }
 
 @font-face {
+    font-family: "ClashDisplay2";
+    src: url("./assets/ClashDisplay-Variable.woff");
+}
+
+@font-face {
     font-family: "ClashGrotesk";
     src: url("./assets/ClashGrotesk-Variable.woff2");
 }
 
 @font-face {
+    font-family: "ClashGrotesk2";
+    src: url("./assets/ClashGrotesk-Variable.woff");
+}
+@font-face {
     font-family: "Satoshi";
     src: url("./assets/Satoshi-Variable.woff2");
 }
 
+@font-face {
+    font-family: "Satoshi2";
+    src: url("./assets/Satoshi-Variable.woff");
+}
 
+.navbar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    font-family: "ClashGrotesk", sans-serif;
+}
 
 .upload-card{
+    font-family: "ClashGrotesk2", sans-serif;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     padding: 40px;
-    width: 420px;
     text-align: center;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(12px);
     display: flex;
     flex-direction: column;
     gap: 20px;
+    width: min(100vw, 900px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .upload-button{
     background: linear-gradient(to right,#5d01ae, #8a03a9);
-    border: none;
+    border: solid black 1px;
     border-radius: 10px;
     padding: 10px 20px;
     color: white;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.25s ease;
+    width: min(100%, 450px);
+    align-self: center;
+    font-family: "ClashDisplay", sans-serif;
 }
 
 .upload-button:hover{
@@ -71,6 +101,7 @@ border: 2px solid rgba(255, 255, 255, 0.3);
     padding: 30px;
     min-height: 180px;
     display: flex;
+    font-family: "ClashDisplay", sans-serif;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -81,14 +112,22 @@ border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .choose-file-btn {
-    background: linear-gradient(to right, #d4a3ff, #da34ff);
+    background-color: #1f003a;
+    font-family: "ClashDisplay", sans-serif;
     border: none;
     border-radius: 10px;
     padding: 5px 10px;
     color: white;
     font-size: 16px;
     cursor: pointer;
+}
+
+.choose-file-btn:hover {
     transition: all 0.25s ease;
+    background-color: #c5a3ef;
+    color: black;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .file-controls{

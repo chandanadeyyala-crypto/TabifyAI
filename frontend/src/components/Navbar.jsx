@@ -1,8 +1,8 @@
 function Navbar(props){
     return(
-        <div>
+        <div className="navbar">
             <h1>{props.title}</h1>
-            <p> This AI converts audio recordings into guitar tabs</p>
+            <p> Convert your audio recordings into guitar tabs</p>
         </div>
     )
 }
