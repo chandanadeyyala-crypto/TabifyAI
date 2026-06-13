@@ -40,7 +40,6 @@ def format_tabs(tabs):
         strings["E"]
     ])
 
-
 def audio_to_notes(audio_path):
 
     y, sr = librosa.load(audio_path, sr=44100)

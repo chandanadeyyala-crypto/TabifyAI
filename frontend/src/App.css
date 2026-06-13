@@ -134,3 +134,140 @@ border: 2px solid rgba(255, 255, 255, 0.3);
     margin-bottom:2px;
 }
 
+.loading{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    font-family: "ClashGrotesk2", sans-serif;
+}
+
+.loading-message{
+    font-family: "ClashDisplay", sans-serif;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    width: min(100vw, 600px);
+}
+
+.progress-circle{
+    width: 120px;
+    height: 120px;
+    background: conic-gradient(
+  #da34ff 80%,
+  rgba(255,255,255,0.1) 60%
+);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.results-card{
+    font-family: "ClashGrotesk2", sans-serif;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: min(100vw, 900px);
+    box-sizing: border-box;
+}
+
+.tabs-display{
+    font-family: "monospace", sans-serif;
+    white-space: pre-wrap;
+    background: #111;
+    color: #0f0;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+}
+.upload-another-btn{
+    background: linear-gradient(to right,#5d01ae, #8a03a9);
+    border: solid black 1px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: min(100%, 450px);
+    align-self: center;
+    font-family: "ClashDisplay", sans-serif;
+}
+
+.upload-another-btn:hover{
+    transition: all 0.3s ease;
+    background:linear-gradient(to right, #8a03a9,#5d01ae,);
+    transform: translateX(-2px) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.download-button{
+    background: linear-gradient(to right,#5d01ae, #8a03a9);
+    border: solid black 1px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: min(100%, 450px);
+    align-self: center;
+    font-family: "ClashDisplay", sans-serif;
+}
+
+.download-button:hover{
+    transition: all 0.3s ease;
+    background:linear-gradient(to right, #8a03a9,#5d01ae,);
+    transform: translateX(-2px) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.progress-circle{
+    animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(218, 52, 255, 0.2);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 35px rgba(218, 52, 255, 0.6);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(218, 52, 255, 0.2);
+    }
+}
+
+.tabs-display {
+  max-width: 100%;
+  overflow-x: auto;
+
+  white-space: pre;
+  font-family: monospace;
+
+  background: #111;
+  color: #00ff88;
+
+  padding: 20px;
+  border-radius: 12px;
+
+  box-sizing: border-box;
+}

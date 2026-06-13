@@ -27,31 +27,22 @@ function Results({
   };
 
   return (
-    <div>
+    <div className="results-card">
       <h2>Generated Guitar Tabs</h2>
 
       <p>
         File: {audioFile?.name}
       </p>
 
-      <pre
-        style={{
-          fontFamily: "monospace",
-          whiteSpace: "pre-wrap",
-          background: "#111",
-          color: "#0f0",
-          padding: "20px",
-          borderRadius: "8px"
-        }}
-      >
+      <pre classname="tabs-display">
         {tabs}
       </pre>
 
-      <button onClick={downloadPDF}>
+      <button onClick={downloadPDF}className="download-button">
         Download PDF
       </button>
 
-      <button
+      <button className="upload-another-btn"
         onClick={() => {
           setAudioFile(null);
           setScreen("upload");

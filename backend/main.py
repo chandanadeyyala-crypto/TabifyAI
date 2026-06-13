@@ -53,7 +53,7 @@ async def upload_song(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     progress_state["progress"] = 25
-    progress_state["message"] = "Running Demucs AI separation..."
+    progress_state["message"] = "Running audio separation..."
 
     subprocess.run(
         ["demucs", file_path],

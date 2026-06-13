@@ -85,12 +85,23 @@ function Loading({ setScreen, setTabs, audioFile }) {
   }, []);
 
   return (
-    <div>
+    <div className="loading">
       <h1>Analyzing your audio...</h1>
 
-      <p>{renderBar(progress)} {progress}%</p>
-
-      <h3>{message}</h3>
+  <div
+  className="progress-circle"
+  style={{
+    background: `conic-gradient(
+      #da34ff ${progress * 3.6}deg,
+      rgba(255,255,255,0.12) ${progress * 3.6}deg
+    )`
+  }}
+>
+  <div className="progress-inner">
+    {progress}%
+  </div>
+</div>
+      <h3 className="loading-message">{message}</h3>
     </div>
   );
 }
