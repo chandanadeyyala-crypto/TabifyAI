@@ -2,14 +2,13 @@ import librosa
 import numpy as np
 
 STRINGS = {
-    "e": 64,   # E4
-    "B": 59,   # B3
-    "G": 55,   # G3
-    "D": 50,   # D3
-    "A": 45,   # A2
-    "E": 40    # E2
+    "e": 64,
+    "B": 59,
+    "G": 55,
+    "D": 50,
+    "A": 45,
+    "E": 40
 }
-
 
 def format_tabs(tabs):
 
@@ -39,7 +38,6 @@ def format_tabs(tabs):
         strings["A"],
         strings["E"]
     ])
-
 def audio_to_notes(audio_path):
 
     y, sr = librosa.load(audio_path, sr=44100)
