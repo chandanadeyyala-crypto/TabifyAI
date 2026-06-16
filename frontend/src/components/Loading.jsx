@@ -1,43 +1,41 @@
 import React, { useState, useEffect } from "react";
 
 function Loading({ setScreen, setTabs, audioFile }) {
-  const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState("Starting...");
-
-  const renderBar = (progress) => {
-    const totalBlocks = 10;
-    const filledBlocks = Math.round((progress / 100) * totalBlocks);
-
-    return (
-      "█".repeat(filledBlocks) +
-      "░".repeat(totalBlocks - filledBlocks)
-    );
-  };
+  const [progress, setProgress] = useState(5);
+  const [message, setMessage] = useState("Preparing upload...");
 
   useEffect(() => {
-    const progressTimer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev < 20) {
-          setMessage("Uploading audio...");
-          return prev + 5;
-        }
+    let slowProgressTimer;
 
-        if (prev < 80) {
-          setMessage("Running Demucs AI separation...");
-          return prev + 2;
-        }
+    const startSlowProgress = () => {
+      slowProgressTimer = setInterval(() => {
+        setProgress((prev) => {
+          if (prev < 25) {
+            setMessage("Uploading audio...");
+            return prev + 1;
+          }
 
-        return prev;
-      });
-    }, 1000);
+          if (prev < 65) {
+            setMessage("Running Demucs AI separation...");
+            return prev + 0.5;
+          }
+
+          if (prev < 78) {
+            setMessage("Extracting guitar stem...");
+            return prev + 0.2;
+          }
+
+          return prev;
+        });
+      }, 1000);
+    };
 
     const uploadToBackend = async () => {
       try {
+        startSlowProgress();
+
         const formData = new FormData();
         formData.append("file", audioFile);
-
-        setProgress(10);
-        setMessage("Uploading audio...");
 
         const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
           method: "POST",
@@ -47,7 +45,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
         const uploadData = await uploadRes.json();
 
         setProgress(80);
-        setMessage("Extracting guitar stem...");
+        setMessage("Generating guitar tabs...");
 
         const tabRes = await fetch(
           `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
@@ -58,18 +56,21 @@ function Loading({ setScreen, setTabs, audioFile }) {
           }
         );
 
-        setProgress(90);
-        setMessage("Generating guitar tabs...");
-
         const tabData = await tabRes.json();
 
+        setProgress(95);
+        setMessage("Finalizing tabs...");
+
         setTabs(tabData.tabs || "");
-        setProgress(100);
-        setMessage("Done!");
 
         setTimeout(() => {
-          setScreen("results");
-        }, 1000);
+          setProgress(100);
+          setMessage("Done!");
+
+          setTimeout(() => {
+            setScreen("results");
+          }, 800);
+        }, 500);
       } catch (err) {
         console.log(err);
         alert("Something went wrong");
@@ -80,7 +81,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     uploadToBackend();
 
     return () => {
-      clearInterval(progressTimer);
+      clearInterval(slowProgressTimer);
     };
   }, []);
 
@@ -88,19 +89,18 @@ function Loading({ setScreen, setTabs, audioFile }) {
     <div className="loading">
       <h1>Analyzing your audio...</h1>
 
-  <div
-  className="progress-circle"
-  style={{
-    background: `conic-gradient(
-      #da34ff ${progress * 3.6}deg,
-      rgba(255,255,255,0.12) ${progress * 3.6}deg
-    )`
-  }}
->
-  <div className="progress-inner">
-    {progress}%
-  </div>
-</div>
+      <div
+        className="progress-circle"
+        style={{
+          background: `conic-gradient(
+            #da34ff ${progress * 3.6}deg,
+            rgba(255,255,255,0.12) ${progress * 3.6}deg
+          )`,
+        }}
+      >
+        <div className="progress-inner">{Math.round(progress)}%</div>
+      </div>
+
       <h3 className="loading-message">{message}</h3>
     </div>
   );
