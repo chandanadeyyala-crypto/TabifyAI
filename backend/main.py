@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 import subprocess
+import re
 
 from tabgen import generate_tabs
 
@@ -41,9 +42,9 @@ def get_progress():
 
 
 @app.post("/upload")
-async def upload_song(file: UploadFile = File(...)):
+def upload_song(file: UploadFile = File(...)):
 
-    progress_data["progress"] = 10
+    progress_data["progress"] = 0
     progress_data["message"] = "Uploading audio..."
 
     file_path = f"{UPLOAD_FOLDER}/{file.filename}"
@@ -51,22 +52,42 @@ async def upload_song(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    progress_data["progress"] = 20
-    progress_data["message"] = "Starting Demucs..."
+    progress_data["message"] = "Starting Demucs AI separation..."
 
-    subprocess.run(
+    process = subprocess.Popen(
         ["demucs", file_path],
-        check=True
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1
     )
 
-    progress_data["progress"] = 70
-    progress_data["message"] = "Extracting guitar stem..."
+    for line in process.stdout:
+        print(line.strip())
+
+        match = re.search(r"(\d+)%", line)
+
+        if match:
+            demucs_percent = int(match.group(1))
+
+            # THIS goes directly to the circle
+            progress_data["progress"] = demucs_percent
+            progress_data["message"] = "Demucs separating audio..."
+
+    process.wait()
+
+    if process.returncode != 0:
+        progress_data["progress"] = 0
+        progress_data["message"] = "Demucs failed"
+        raise Exception("Demucs failed")
+
+    progress_data["progress"] = 100
+    progress_data["message"] = "Demucs separation complete"
 
     song_name = file.filename.rsplit(".", 1)[0]
     guitar_path = f"separated/htdemucs/{song_name}/other.wav"
 
-    progress_data["progress"] = 80
-    progress_data["message"] = "Audio separated successfully"
+    progress_data["message"] = "Guitar stem extracted"
 
     return {
         "status": "completed",
@@ -75,17 +96,16 @@ async def upload_song(file: UploadFile = File(...)):
 
 
 @app.post("/generate-tabs")
-async def generate_tab(file_path: str):
+def generate_tab(file_path: str):
 
-    progress_data["progress"] = 85
     progress_data["message"] = "Detecting notes..."
 
     cleaned_path = file_path.replace("file_path: ", "").strip()
 
     tabs = generate_tabs(cleaned_path)
 
+    progress_data["message"] = "Guitar tabs generated successfully"
     progress_data["progress"] = 100
-    progress_data["message"] = "Generating guitar tabs complete"
 
     return {
         "status": "success",

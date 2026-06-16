@@ -28,14 +28,18 @@ function Upload({ setScreen, setAudioFile }) {
     handleFile(droppedFile);
   };
 
-  const uploadFile = () => {
-    if (!file) {
-      alert("Please select an audio file");
-      return;
-    }
+const uploadFile = () => {
+  if (!file) {
+    alert("Please select an audio file");
+    return;
+  }
 
+  setAudioFile(file);
+
+  setTimeout(() => {
     setScreen("loading");
-  };
+  }, 0);
+};
 
 return (
   <div className="upload-card">

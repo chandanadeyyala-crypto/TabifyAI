@@ -1,38 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function Loading({ setScreen, setTabs, audioFile }) {
-  const [progress, setProgress] = useState(5);
-  const [message, setMessage] = useState("Preparing upload...");
+  const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("Starting...");
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    let slowProgressTimer;
+    const fetchProgress = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/progress");
+        const data = await res.json();
 
-    const startSlowProgress = () => {
-      slowProgressTimer = setInterval(() => {
-        setProgress((prev) => {
-          if (prev < 25) {
-            setMessage("Uploading audio...");
-            return prev + 1;
-          }
+        const backendProgress = Number(data.progress);
 
-          if (prev < 65) {
-            setMessage("Running Demucs AI separation...");
-            return prev + 0.5;
-          }
+        if (!isNaN(backendProgress)) {
+          setProgress(backendProgress);
+        }
 
-          if (prev < 78) {
-            setMessage("Extracting guitar stem...");
-            return prev + 0.2;
-          }
-
-          return prev;
-        });
-      }, 1000);
+       if (data.message && data.message !== "Idle") {
+          setMessage(data.message);
+        }
+      } catch (err) {
+        console.log("Progress fetch error:", err);
+      }
     };
 
-    const uploadToBackend = async () => {
+    const startProgressPolling = () => {
+      fetchProgress();
+
+      intervalRef.current = setInterval(() => {
+        fetchProgress();
+      }, 500);
+    };
+
+    const stopProgressPolling = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+
+    const uploadAndGenerateTabs = async () => {
       try {
-        startSlowProgress();
+        console.log("Audio file in Loading:", audioFile);
+        setMessage("Uploading audio...");
+        startProgressPolling();
 
         const formData = new FormData();
         formData.append("file", audioFile);
@@ -44,8 +55,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
 
         const uploadData = await uploadRes.json();
 
-        setProgress(80);
-        setMessage("Generating guitar tabs...");
+        await fetchProgress();
 
         const tabRes = await fetch(
           `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
@@ -58,32 +68,33 @@ function Loading({ setScreen, setTabs, audioFile }) {
 
         const tabData = await tabRes.json();
 
-        setProgress(95);
-        setMessage("Finalizing tabs...");
+        await fetchProgress();
 
         setTabs(tabData.tabs || "");
+        setProgress(100);
+        setMessage("Done!");
+
+        stopProgressPolling();
 
         setTimeout(() => {
-          setProgress(100);
-          setMessage("Done!");
-
-          setTimeout(() => {
-            setScreen("results");
-          }, 800);
-        }, 500);
+          setScreen("results");
+        }, 1000);
       } catch (err) {
         console.log(err);
         alert("Something went wrong");
+        stopProgressPolling();
         setScreen("upload");
       }
     };
 
-    uploadToBackend();
+    uploadAndGenerateTabs();
 
     return () => {
-      clearInterval(slowProgressTimer);
+      stopProgressPolling();
     };
-  }, []);
+  }, [audioFile, setScreen, setTabs]);
+
+  const safeProgress = Math.min(100, Math.max(0, Number(progress)));
 
   return (
     <div className="loading">
@@ -93,12 +104,12 @@ function Loading({ setScreen, setTabs, audioFile }) {
         className="progress-circle"
         style={{
           background: `conic-gradient(
-            #da34ff ${progress * 3.6}deg,
-            rgba(255,255,255,0.12) ${progress * 3.6}deg
+            #da34ff ${safeProgress * 3.6}deg,
+            rgba(255,255,255,0.12) ${safeProgress * 3.6}deg
           )`,
         }}
       >
-        <div className="progress-inner">{Math.round(progress)}%</div>
+        <div className="progress-inner">{Math.round(safeProgress)}%</div>
       </div>
 
       <h3 className="loading-message">{message}</h3>
