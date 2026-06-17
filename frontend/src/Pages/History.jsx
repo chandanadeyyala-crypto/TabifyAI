@@ -17,6 +17,7 @@ function History({ setScreen }) {
         const data = await res.json();
 
         if (data.status === "success") {
+          console.log("Fetched songs:", data.songs);
           setSongs(data.songs);
         }
       } catch (err) {
@@ -26,6 +27,35 @@ function History({ setScreen }) {
 
     fetchSongs();
   }, []);
+
+  const deleteSong = async (songId) => {
+    if (!songId) {
+      alert("Song id missing. Refresh My Songs page.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Delete this song?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/delete-song/${songId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (data.status === "success") {
+        setSongs((prevSongs) =>
+          prevSongs.filter((song) => song.id !== songId)
+        );
+      } else {
+        alert(data.message);
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Failed to delete song");
+    }
+  };
 
   return (
     <div className="results-card">
@@ -44,14 +74,14 @@ function History({ setScreen }) {
         </div>
       ) : (
         <div className="songs-list">
-          {songs.map((song, index) => (
-            <div key={index} className="song-card">
+          {songs.map((song) => (
+            <div key={song.id} className="song-card">
               <h3>{song.fileName}</h3>
               <p>{song.createdAt}</p>
 
-              <pre className="tabs-display">
-                {song.tabs}
-              </pre>
+              <pre className="tabs-display">{song.tabs}</pre>
+
+              
             </div>
           ))}
         </div>

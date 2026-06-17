@@ -7,8 +7,9 @@ import re
 from pydantic import BaseModel
 from database import users_collection, songs_collection
 from passlib.context import CryptContext
-
+from bson import ObjectId
 from tabgen import generate_tabs
+from passlib.context import CryptContext
 
 app = FastAPI()
 
@@ -32,6 +33,7 @@ progress_data = {
 }
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 @app.get("/")
 def home():
@@ -139,7 +141,7 @@ async def signup(user: User):
 
     await users_collection.insert_one({
         "email": user.email,
-        "password": user.password
+        "password": pwd_context.hash(user.password)
     })
 
     return {
@@ -160,7 +162,7 @@ async def login(user: User):
             "message": "User not found"
         }
 
-    if existing["password"] != user.password:
+    if not pwd_context.verify(user.password, existing["password"]):
         return {
             "status": "error",
             "message": "Incorrect password"
@@ -193,7 +195,6 @@ async def save_song(song: Song):
         "message": "Song saved successfully"
     }
 
-
 @app.get("/my-songs")
 async def my_songs(email: str):
     songs_cursor = songs_collection.find({
@@ -204,12 +205,20 @@ async def my_songs(email: str):
 
     async for song in songs_cursor:
         songs.append({
+            "id": str(song["_id"]),
             "fileName": song["fileName"],
             "tabs": song["tabs"],
             "createdAt": str(song["createdAt"])
         })
 
+    songs.append({
+    "id": str(song["_id"]),
+    "fileName": song["fileName"],
+    "tabs": song["tabs"],
+    "createdAt": str(song["createdAt"])
+    })
     return {
         "status": "success",
         "songs": songs
     }
+
