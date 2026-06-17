@@ -2,6 +2,9 @@ import Navbar from "./components/Navbar";
 import Upload from "./components/Upload";
 import Loading from "./components/Loading";
 import Results from "./Pages/Results";
+import Signup from "./Pages/Signup";
+import Login from "./Pages/Login";
+import History from "./Pages/History";
 import { useState } from "react";
 import "./App.css";
 
@@ -9,10 +12,19 @@ function App() {
   const [screen, setScreen] = useState("upload");
   const [tabs, setTabs] = useState("");
   const [audioFile, setAudioFile] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+  localStorage.getItem("user") ? true : false
+);
 console.log("Current screen:", screen);
   return (
     <div className= "card">
-      <Navbar title="TabifyAI" />
+       <Navbar
+          title="TabifyAI"
+          setScreen={setScreen}
+          screen={screen}
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
+        />
 
       {screen === "upload" && (
         <Upload
@@ -36,6 +48,21 @@ console.log("Current screen:", screen);
           audioFile={audioFile}
           setAudioFile={setAudioFile}
         />
+      )}
+
+      {screen === "signup" && (
+        <Signup setScreen={setScreen} />
+     )}
+
+      {screen === "login" && (
+        <Login
+           setScreen={setScreen}
+           setIsLoggedIn={setIsLoggedIn}
+       />
+      )}
+
+      {screen === "history" && (
+        <History setScreen={setScreen} />
       )}
     </div>
   );

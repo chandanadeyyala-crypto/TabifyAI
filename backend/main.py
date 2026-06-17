@@ -5,7 +5,8 @@ import os
 import subprocess
 import re
 from pydantic import BaseModel
-from database import users_collection
+from database import users_collection, songs_collection
+from passlib.context import CryptContext
 
 from tabgen import generate_tabs
 
@@ -30,6 +31,7 @@ progress_data = {
     "message": "Idle"
 }
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @app.get("/")
 def home():
@@ -118,9 +120,13 @@ class User(BaseModel):
     email: str
     password: str
 
+class User(BaseModel):
+    email: str
+    password: str
+
+
 @app.post("/signup")
 async def signup(user: User):
-
     existing = await users_collection.find_one({
         "email": user.email
     })
@@ -137,5 +143,73 @@ async def signup(user: User):
     })
 
     return {
-        "status": "success"
+        "status": "success",
+        "message": "User created successfully"
+    }
+
+@app.post("/login")
+async def login(user: User):
+
+    existing = await users_collection.find_one({
+        "email": user.email
+    })
+
+    if not existing:
+        return {
+            "status": "error",
+            "message": "User not found"
+        }
+
+    if existing["password"] != user.password:
+        return {
+            "status": "error",
+            "message": "Incorrect password"
+        }
+
+    return {
+        "status": "success",
+        "message": "Login successful"
+    }
+
+from datetime import datetime
+
+class Song(BaseModel):
+    email: str
+    fileName: str
+    tabs: str
+
+
+@app.post("/save-song")
+async def save_song(song: Song):
+    await songs_collection.insert_one({
+        "email": song.email,
+        "fileName": song.fileName,
+        "tabs": song.tabs,
+        "createdAt": datetime.now()
+    })
+
+    return {
+        "status": "success",
+        "message": "Song saved successfully"
+    }
+
+
+@app.get("/my-songs")
+async def my_songs(email: str):
+    songs_cursor = songs_collection.find({
+        "email": email
+    }).sort("createdAt", -1)
+
+    songs = []
+
+    async for song in songs_cursor:
+        songs.append({
+            "fileName": song["fileName"],
+            "tabs": song["tabs"],
+            "createdAt": str(song["createdAt"])
+        })
+
+    return {
+        "status": "success",
+        "songs": songs
     }
