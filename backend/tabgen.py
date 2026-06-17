@@ -1,5 +1,5 @@
 import librosa
-import numpy as np
+from basic_pitch.inference import predict
 
 STRINGS = {
     "e": 64,
@@ -10,8 +10,8 @@ STRINGS = {
     "E": 40
 }
 
-def format_tabs(tabs):
 
+def format_tabs(tabs):
     strings = {
         "e": "e|",
         "B": "B|",
@@ -22,9 +22,7 @@ def format_tabs(tabs):
     }
 
     for tab in tabs:
-
         for string_name in strings:
-
             if string_name == tab["string"]:
                 strings[string_name] += f"-{tab['fret']}-"
             else:
@@ -38,62 +36,50 @@ def format_tabs(tabs):
         strings["A"],
         strings["E"]
     ])
+
+
 def audio_to_notes(audio_path):
-
-    y, sr = librosa.load(audio_path, sr=44100)
-
-    pitches, magnitudes = librosa.piptrack(
-        y=y,
-        sr=sr
-    )
+    model_output, midi_data, note_events = predict(audio_path)
 
     notes = []
-    last_note = None
 
-    onsets = librosa.onset.onset_detect(
-        y=y,
-        sr=sr,
-        units="frames"
-    )
+    for note in note_events:
+        start_time = note[0]
+        end_time = note[1]
+        midi_pitch = int(note[2])
+        confidence = float(note[3])
 
-    for t in onsets:
-
-        if t >= pitches.shape[1]:
+        if confidence < 0.5:
             continue
 
-        index = magnitudes[:, t].argmax()
+        note_name = librosa.midi_to_note(midi_pitch)
 
-        pitch = pitches[index, t]
-        magnitude = magnitudes[index, t]
+        notes.append({
+            "note": note_name,
+            "midi": midi_pitch,
+            "start": start_time,
+            "end": end_time,
+            "confidence": confidence
+        })
 
-        if pitch > 0 and magnitude > 0.1:
+    notes = sorted(notes, key=lambda x: x["start"])
 
-            note = librosa.hz_to_note(pitch)
-
-            if note != last_note:
-                notes.append(note)
-                last_note = note
-
-    return notes[:50]
+    return notes
 
 
-def note_to_tab(note):
-
-    midi = librosa.note_to_midi(note)
+def note_to_tab(note_data):
+    midi = note_data["midi"]
 
     possible = []
 
     for string, open_note in STRINGS.items():
-
         fret = midi - open_note
 
         if 0 <= fret <= 24:
-            possible.append(
-                {
-                    "string": string,
-                    "fret": int(fret)
-                }
-            )
+            possible.append({
+                "string": string,
+                "fret": int(fret)
+            })
 
     if possible:
         return min(possible, key=lambda x: x["fret"])
@@ -102,18 +88,18 @@ def note_to_tab(note):
 
 
 def generate_tabs(audio_path):
-
     notes = audio_to_notes(audio_path)
 
     tabs = []
 
-    for note in notes:
-
-        position = note_to_tab(note)
+    for note_data in notes:
+        position = note_to_tab(note_data)
 
         if position:
             tabs.append({
-                "note": note,
+                "note": note_data["note"],
+                "start": note_data["start"],
+                "confidence": note_data["confidence"],
                 **position
             })
 

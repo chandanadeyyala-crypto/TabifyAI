@@ -4,6 +4,8 @@ import shutil
 import os
 import subprocess
 import re
+from pydantic import BaseModel
+from database import users_collection
 
 from tabgen import generate_tabs
 
@@ -110,4 +112,30 @@ def generate_tab(file_path: str):
     return {
         "status": "success",
         "tabs": tabs
+    }
+
+class User(BaseModel):
+    email: str
+    password: str
+
+@app.post("/signup")
+async def signup(user: User):
+
+    existing = await users_collection.find_one({
+        "email": user.email
+    })
+
+    if existing:
+        return {
+            "status": "error",
+            "message": "User already exists"
+        }
+
+    await users_collection.insert_one({
+        "email": user.email,
+        "password": user.password
+    })
+
+    return {
+        "status": "success"
     }
