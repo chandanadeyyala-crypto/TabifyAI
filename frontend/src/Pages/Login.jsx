@@ -21,6 +21,7 @@ function Login({ setScreen, setIsLoggedIn }) {
 
       if (data.status === "success") {
 
+        localStorage.setItem("token", data.access_token);
         localStorage.setItem("user", email);
 
         setIsLoggedIn(true);

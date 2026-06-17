@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
+import { jsPDF } from "jspdf";
 
 function History({ setScreen }) {
   const [songs, setSongs] = useState([]);
 
   useEffect(() => {
     const fetchSongs = async () => {
-      const userEmail = localStorage.getItem("user");
-
-      if (!userEmail) return;
-
       try {
-        const res = await fetch(
-          `http://127.0.0.1:8000/my-songs?email=${encodeURIComponent(userEmail)}`
-        );
-
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://127.0.0.1:8000/my-songs", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await res.json();
-
         if (data.status === "success") {
           console.log("Fetched songs:", data.songs);
           setSongs(data.songs);
@@ -24,39 +22,57 @@ function History({ setScreen }) {
         console.log(err);
       }
     };
-
     fetchSongs();
   }, []);
 
-  const deleteSong = async (songId) => {
-    if (!songId) {
-      alert("Song id missing. Refresh My Songs page.");
-      return;
-    }
+  const downloadPDF = (song) => {
+  const doc = new jsPDF();
 
-    const confirmDelete = window.confirm("Delete this song?");
-    if (!confirmDelete) return;
+  doc.setFont("courier");
+  doc.setFontSize(12);
 
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/delete-song/${songId}`, {
+  doc.text("TabifyAI Generated Guitar Tabs", 10, 15);
+  doc.text(`File: ${song.fileName}`, 10, 25);
+
+  const lines = song.tabs.split("\n");
+
+  doc.text(lines, 10, 40);
+
+  doc.save(`${song.fileName}-tabs.pdf`);
+};
+
+const deleteSong = async (songId) => {
+  const confirmDelete = window.confirm("Delete this song?");
+
+  if (!confirmDelete) return;
+
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(
+      `http://127.0.0.1:8000/delete-song/${songId}`,
+      {
         method: "DELETE",
-      });
-
-      const data = await res.json();
-
-      if (data.status === "success") {
-        setSongs((prevSongs) =>
-          prevSongs.filter((song) => song.id !== songId)
-        );
-      } else {
-        alert(data.message);
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (err) {
-      console.log(err);
-      alert("Failed to delete song");
-    }
-  };
+    );
 
+    const data = await res.json();
+
+    if (data.status === "success") {
+      setSongs((prevSongs) =>
+        prevSongs.filter((song) => song.id !== songId)
+      );
+    } else {
+      alert(data.message);
+    }
+  } catch (err) {
+    console.log(err);
+    alert("Failed to delete song");
+  }
+};
   return (
     <div className="results-card">
       <h2>My Songs</h2>
@@ -64,7 +80,6 @@ function History({ setScreen }) {
       {songs.length === 0 ? (
         <div className="empty-history">
           <p>You haven't uploaded any songs yet.</p>
-
           <button
             className="upload-button"
             onClick={() => setScreen("upload")}
@@ -73,18 +88,21 @@ function History({ setScreen }) {
           </button>
         </div>
       ) : (
-        <div className="songs-list">
-          {songs.map((song) => (
-            <div key={song.id} className="song-card">
-              <h3>{song.fileName}</h3>
-              <p>{song.createdAt}</p>
-
-              <pre className="tabs-display">{song.tabs}</pre>
-
-              
-            </div>
-          ))}
-        </div>
+        songs.map((song) => (
+          <div className="song-card" key={song.id || song._id}>
+            <h3>{song.fileName}</h3>
+            <p>{new Date(song.createdAt).toLocaleDateString()}</p>
+            <button className="download-button" onClick={() => downloadPDF(song)}>
+              Download PDF
+              </button>
+              <button className="download-button" onClick={() => deleteSong(song.id)}>
+                Delete Song
+                </button>
+            <pre className="tabs-display">
+              {song.tabs}
+            </pre>
+          </div>
+        ))
       )}
     </div>
   );

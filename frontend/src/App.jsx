@@ -12,8 +12,8 @@ function App() {
   const [screen, setScreen] = useState("upload");
   const [tabs, setTabs] = useState("");
   const [audioFile, setAudioFile] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(
-  localStorage.getItem("user") ? true : false
+const [isLoggedIn, setIsLoggedIn] = useState(
+  !!localStorage.getItem("token")
 );
 console.log("Current screen:", screen);
   return (

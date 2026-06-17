@@ -9,7 +9,10 @@ from database import users_collection, songs_collection
 from passlib.context import CryptContext
 from bson import ObjectId
 from tabgen import generate_tabs
-from passlib.context import CryptContext
+from jose import JWTError, jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -33,6 +36,51 @@ progress_data = {
 }
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+SECRET_KEY = "tabifyai_secret_key_change_later"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+SECRET_KEY = "tabifyai_secret_key_change_later"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    return encoded_jwt
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM]
+        )
+
+        email = payload.get("sub")
+
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        return email
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @app.get("/")
@@ -162,29 +210,39 @@ async def login(user: User):
             "message": "User not found"
         }
 
-    if not pwd_context.verify(user.password, existing["password"]):
+    if not pwd_context.verify(
+        user.password,
+        existing["password"]
+    ):
         return {
             "status": "error",
-            "message": "Incorrect password"
+            "message": "Invalid password"
         }
+
+    access_token = create_access_token({
+        "sub": existing["email"]
+    })
 
     return {
         "status": "success",
-        "message": "Login successful"
+        "message": "Login successful",
+        "access_token": access_token,
+        "token_type": "bearer"
     }
 
 from datetime import datetime
 
 class Song(BaseModel):
-    email: str
     fileName: str
     tabs: str
 
 
 @app.post("/save-song")
-async def save_song(song: Song):
+async def save_song(
+    song: Song,
+    current_user: str = Depends(get_current_user)):
     await songs_collection.insert_one({
-        "email": song.email,
+        "email": current_user,
         "fileName": song.fileName,
         "tabs": song.tabs,
         "createdAt": datetime.now()
@@ -196,9 +254,10 @@ async def save_song(song: Song):
     }
 
 @app.get("/my-songs")
-async def my_songs(email: str):
+async def my_songs(current_user: str = Depends(get_current_user)):
+
     songs_cursor = songs_collection.find({
-        "email": email
+        "email": current_user
     }).sort("createdAt", -1)
 
     songs = []
@@ -211,14 +270,28 @@ async def my_songs(email: str):
             "createdAt": str(song["createdAt"])
         })
 
-    songs.append({
-    "id": str(song["_id"]),
-    "fileName": song["fileName"],
-    "tabs": song["tabs"],
-    "createdAt": str(song["createdAt"])
-    })
     return {
         "status": "success",
         "songs": songs
     }
 
+@app.delete("/delete-song/{song_id}")
+async def delete_song(
+    song_id: str,
+    current_user: str = Depends(get_current_user)
+):
+    result = await songs_collection.delete_one({
+        "_id": ObjectId(song_id),
+        "email": current_user
+    })
+
+    if result.deleted_count == 1:
+        return {
+            "status": "success",
+            "message": "Song deleted successfully"
+        }
+
+    return {
+        "status": "error",
+        "message": "Song not found"
+    }

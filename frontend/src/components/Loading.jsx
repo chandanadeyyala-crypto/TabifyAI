@@ -73,19 +73,22 @@ function Loading({ setScreen, setTabs, audioFile }) {
         setTabs(tabData.tabs || "");
         const userEmail = localStorage.getItem("user");
 
-        if (userEmail && tabData.tabs) {
-         await fetch("http://127.0.0.1:8000/save-song", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              email: userEmail,
-              fileName: audioFile.name,
-              tabs: tabData.tabs
-            })
-          });
-        }
+const token = localStorage.getItem("token");
+console.log("Token while saving:", token);
+
+if (token && tabData.tabs) {
+  await fetch("http://127.0.0.1:8000/save-song", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      fileName: audioFile.name,
+      tabs: tabData.tabs,
+    }),
+  });
+}
         setProgress(100);
         setMessage("Done!");
 

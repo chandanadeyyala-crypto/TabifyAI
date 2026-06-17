@@ -3,12 +3,14 @@ import { useState } from "react";
 function Navbar({ title, setScreen, screen, isLoggedIn, setIsLoggedIn }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setScreen("upload");
-    setMenuOpen(false);
-  };
+
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  setIsLoggedIn(false);
+  setScreen("upload");
+};
 
   const goTo = (page) => {
     setScreen(page);
