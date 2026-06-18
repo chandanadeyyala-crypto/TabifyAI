@@ -9,7 +9,7 @@ function History({ setScreen }) {
     const fetchSongs = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("${import.meta.env.VITE_API_URL}/my-songs", {
+        const res = await fetch('${import.meta.env.VITE_API_URL}/my-songs', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

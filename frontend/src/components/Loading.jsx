@@ -8,7 +8,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await fetch("${import.meta.env.VITE_API_URL}/progress");
+        const res = await fetch('${import.meta.env.VITE_API_URL}/progress');
         const data = await res.json();
         const backendProgress = Number(data.progress);
         
@@ -44,7 +44,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     const formData = new FormData();
     formData.append("file", audioFile);
 
-    const uploadRes = await fetch("${import.meta.env.VITE_API_URL}/upload", {
+    const uploadRes = await fetch('${import.meta.env.VITE_API_URL}/upload', {
       method: "POST",
       body: formData,
     });

@@ -12,7 +12,7 @@ function Results({setScreen, tabs, setAudioFile, audioFile}) {
   }
 
   try {
-    const res = await fetch("${import.meta.env.VITE_API_URL}/save-song", {
+    const res = await fetch('${import.meta.env.VITE_API_URL}/save-song', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
