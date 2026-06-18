@@ -44,7 +44,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     const formData = new FormData();
     formData.append("file", audioFile);
 
-    const uploadRes = await fetch("https://tabifyai.onrender.com/", {
+    const uploadRes = await fetch("https://tabifyai.onrender.com/upload", {
       method: "POST",
       body: formData,
     });
@@ -54,7 +54,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     await fetchProgress();
 
     const tabRes = await fetch(
-      `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
+      `https://tabifyai.onrender.com/generate-tabs?file_path=${encodeURIComponent(
       uploadData.guitar_file
       )}`,
         {
