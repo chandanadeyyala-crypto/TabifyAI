@@ -6,7 +6,7 @@ function Login({ setScreen, setIsLoggedIn }) {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch("http://https://tabifyai.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

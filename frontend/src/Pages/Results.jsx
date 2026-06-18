@@ -12,7 +12,7 @@ function Results({setScreen, tabs, setAudioFile, audioFile}) {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/save-song", {
+    const res = await fetch("http://https://tabifyai.onrender.com/save-song", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
