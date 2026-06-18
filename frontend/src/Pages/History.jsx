@@ -9,7 +9,7 @@ function History({ setScreen }) {
     const fetchSongs = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://https://tabifyai.onrender.com/my-songs", {
+        const res = await fetch("${API_URL}/my-songs", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -105,7 +105,7 @@ const deleteSong = async (songId) => {
 
   try {
     const res = await fetch(
-      `http://https://tabifyai.onrender.com/delete-song/${songId}`,
+      `${API_URL}/delete-song/${songId}`,
       {
         method: "DELETE",
         headers: {

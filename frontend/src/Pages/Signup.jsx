@@ -6,7 +6,7 @@ function Signup({ setScreen }) {
 
   const handleSignup = async () => {
     try {
-      const res = await fetch("http://https://tabifyai.onrender.com/signup", {
+      const res = await fetch("${API_URL}/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

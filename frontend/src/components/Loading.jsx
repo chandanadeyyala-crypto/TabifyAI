@@ -8,7 +8,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await fetch("https://tabifyai.onrender.com/progress");
+        const res = await fetch("${API_URL}/progress");
         const data = await res.json();
         const backendProgress = Number(data.progress);
         
@@ -44,7 +44,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     const formData = new FormData();
     formData.append("file", audioFile);
 
-    const uploadRes = await fetch("https://tabifyai.onrender.com/upload", {
+    const uploadRes = await fetch("${API_URL}/upload", {
       method: "POST",
       body: formData,
     });
@@ -54,7 +54,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     await fetchProgress();
 
     const tabRes = await fetch(
-      `https://tabifyai.onrender.com/generate-tabs?file_path=${encodeURIComponent(
+      `${API_URL}/generate-tabs?file_path=${encodeURIComponent(
       uploadData.guitar_file
       )}`,
         {
