@@ -8,7 +8,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/progress");
+        const res = await fetch("https://tabifyai.onrender.com/progress");
         const data = await res.json();
         const backendProgress = Number(data.progress);
         
@@ -44,7 +44,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
     const formData = new FormData();
     formData.append("file", audioFile);
 
-    const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
+    const uploadRes = await fetch("https://tabifyai.onrender.com/", {
       method: "POST",
       body: formData,
     });
