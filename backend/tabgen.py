@@ -10,7 +10,6 @@ STRINGS = {
     "E": 40
 }
 
-
 def format_tabs(tabs):
     strings = {
         "e": "e|",
@@ -40,9 +39,7 @@ def format_tabs(tabs):
 
 def audio_to_notes(audio_path):
     model_output, midi_data, note_events = predict(audio_path)
-
     notes = []
-
     for note in note_events:
         start_time = note[0]
         end_time = note[1]
@@ -65,7 +62,6 @@ def audio_to_notes(audio_path):
     notes = sorted(notes, key=lambda x: x["start"])
 
     return notes
-
 
 def note_to_tab(note_data):
     midi = note_data["midi"]

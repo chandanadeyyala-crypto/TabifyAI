@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import toast from "react-hot-toast"
 function Loading({ setScreen, setTabs, audioFile }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("Starting...");
@@ -10,14 +10,13 @@ function Loading({ setScreen, setTabs, audioFile }) {
       try {
         const res = await fetch("http://127.0.0.1:8000/progress");
         const data = await res.json();
-
         const backendProgress = Number(data.progress);
-
+        
         if (!isNaN(backendProgress)) {
           setProgress(backendProgress);
         }
 
-       if (data.message && data.message !== "Idle") {
+        if (data.message && data.message !== "Idle") {
           setMessage(data.message);
         }
       } catch (err) {
@@ -27,10 +26,7 @@ function Loading({ setScreen, setTabs, audioFile }) {
 
     const startProgressPolling = () => {
       fetchProgress();
-
-      intervalRef.current = setInterval(() => {
-        fetchProgress();
-      }, 500);
+      intervalRef.current = setInterval(() => { fetchProgress(); }, 500);
     };
 
     const stopProgressPolling = () => {
@@ -45,61 +41,41 @@ function Loading({ setScreen, setTabs, audioFile }) {
         setMessage("Uploading audio...");
         startProgressPolling();
 
-        const formData = new FormData();
-        formData.append("file", audioFile);
+    const formData = new FormData();
+    formData.append("file", audioFile);
 
-        const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
+    const uploadRes = await fetch("http://127.0.0.1:8000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const uploadData = await uploadRes.json();
+
+    await fetchProgress();
+
+    const tabRes = await fetch(
+      `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
+      uploadData.guitar_file
+      )}`,
+        {
           method: "POST",
-          body: formData,
-        });
+        }
+    );
 
-        const uploadData = await uploadRes.json();
+    const tabData = await tabRes.json();
 
-        await fetchProgress();
+    await fetchProgress();
 
-        const tabRes = await fetch(
-          `http://127.0.0.1:8000/generate-tabs?file_path=${encodeURIComponent(
-            uploadData.guitar_file
-          )}`,
-          {
-            method: "POST",
-          }
-        );
+    setTabs(tabData.tabs || "");
+    setProgress(100);
+    setMessage("Done!");
 
-        const tabData = await tabRes.json();
+    stopProgressPolling();
 
-        await fetchProgress();
-
-        setTabs(tabData.tabs || "");
-        const userEmail = localStorage.getItem("user");
-
-const token = localStorage.getItem("token");
-console.log("Token while saving:", token);
-
-if (token && tabData.tabs) {
-  await fetch("http://127.0.0.1:8000/save-song", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      fileName: audioFile.name,
-      tabs: tabData.tabs,
-    }),
-  });
-}
-        setProgress(100);
-        setMessage("Done!");
-
-        stopProgressPolling();
-
-        setTimeout(() => {
-          setScreen("results");
-        }, 1000);
+    setTimeout(() => {setScreen("results"); }, 1000);
       } catch (err) {
         console.log(err);
-        alert("Something went wrong");
+        toast.error("Something went wrong");
         stopProgressPolling();
         setScreen("upload");
       }
@@ -107,9 +83,7 @@ if (token && tabData.tabs) {
 
     uploadAndGenerateTabs();
 
-    return () => {
-      stopProgressPolling();
-    };
+    return () => { stopProgressPolling(); };
   }, [audioFile, setScreen, setTabs]);
 
   const safeProgress = Math.min(100, Math.max(0, Number(progress)));
@@ -117,19 +91,12 @@ if (token && tabData.tabs) {
   return (
     <div className="loading">
       <h1>Analyzing your audio...</h1>
-
       <div
         className="progress-circle"
-        style={{
-          background: `conic-gradient(
-            #da34ff ${safeProgress * 3.6}deg,
-            rgba(255,255,255,0.12) ${safeProgress * 3.6}deg
-          )`,
-        }}
-      >
+        style={{ background: `conic-gradient( #da34ff ${safeProgress * 3.6}deg, rgba(255,255,255,0.12) ${safeProgress * 3.6}deg)`,
+        }}>
         <div className="progress-inner">{Math.round(safeProgress)}%</div>
       </div>
-
       <h3 className="loading-message">{message}</h3>
     </div>
   );

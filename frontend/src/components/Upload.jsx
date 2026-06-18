@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import toast from "react-hot-toast";
 function Upload({ setScreen, setAudioFile }) {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -30,7 +30,7 @@ function Upload({ setScreen, setAudioFile }) {
 
 const uploadFile = () => {
   if (!file) {
-    alert("Please select an audio file");
+    toast("Please select an audio file");
     return;
   }
 
@@ -54,18 +54,12 @@ return (
       <div className="drop-center">
         <span>{file ? file.name : "Drop your file in this box"}</span>
       </div>
- <div className="file-controls">
-  {!file && (
-    <label className="choose-file-btn">
-      Choose File
-      <input
-        type="file"
-        accept="audio/*"
-        onChange={(e) => handleFile(e.target.files[0])}
-        hidden
-      />
-    </label>
-  )}
+      <div className="file-controls">
+        {!file && (
+          <label className="choose-file-btn">
+            Choose File
+            <input type="file" accept="audio/*" onChange={(e) => handleFile(e.target.files[0])} hidden/></label>
+          )}
 </div>
     </div>
 

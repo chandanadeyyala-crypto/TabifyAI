@@ -15,13 +15,9 @@ from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,7 +25,6 @@ app.add_middleware(
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 progress_data = {
     "progress": 0,
     "message": "Idle"
@@ -42,16 +37,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-SECRET_KEY = "tabifyai_secret_key_change_later"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -66,34 +51,25 @@ def create_access_token(data: dict):
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM]
-        )
-
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
 
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-
         return email
 
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-
 @app.get("/")
 def home():
     return {
-        "message": "TabifyAI backend running"
+        "message": "Backend is running!! :)"
     }
-
 
 @app.get("/progress")
 def get_progress():
     return progress_data
-
 
 @app.post("/upload")
 def upload_song(file: UploadFile = File(...)):
@@ -118,18 +94,14 @@ def upload_song(file: UploadFile = File(...)):
 
     for line in process.stdout:
         print(line.strip())
-
         match = re.search(r"(\d+)%", line)
 
         if match:
             demucs_percent = int(match.group(1))
-
-            # THIS goes directly to the circle
             progress_data["progress"] = demucs_percent
             progress_data["message"] = "Demucs separating audio..."
 
     process.wait()
-
     if process.returncode != 0:
         progress_data["progress"] = 0
         progress_data["message"] = "Demucs failed"
@@ -140,14 +112,12 @@ def upload_song(file: UploadFile = File(...)):
 
     song_name = file.filename.rsplit(".", 1)[0]
     guitar_path = f"separated/htdemucs/{song_name}/other.wav"
-
     progress_data["message"] = "Guitar stem extracted"
 
     return {
         "status": "completed",
         "guitar_file": guitar_path
     }
-
 
 @app.post("/generate-tabs")
 def generate_tab(file_path: str):
@@ -169,11 +139,6 @@ def generate_tab(file_path: str):
 class User(BaseModel):
     email: str
     password: str
-
-class User(BaseModel):
-    email: str
-    password: str
-
 
 @app.post("/signup")
 async def signup(user: User):
@@ -203,13 +168,11 @@ async def login(user: User):
     existing = await users_collection.find_one({
         "email": user.email
     })
-
     if not existing:
         return {
             "status": "error",
             "message": "User not found"
         }
-
     if not pwd_context.verify(
         user.password,
         existing["password"]
@@ -229,8 +192,6 @@ async def login(user: User):
         "access_token": access_token,
         "token_type": "bearer"
     }
-
-from datetime import datetime
 
 class Song(BaseModel):
     fileName: str
@@ -276,6 +237,7 @@ async def my_songs(current_user: str = Depends(get_current_user)):
     }
 
 @app.delete("/delete-song/{song_id}")
+
 async def delete_song(
     song_id: str,
     current_user: str = Depends(get_current_user)

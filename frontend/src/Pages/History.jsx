@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
-
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 function History({ setScreen }) {
   const [songs, setSongs] = useState([]);
 
@@ -25,26 +26,80 @@ function History({ setScreen }) {
     fetchSongs();
   }, []);
 
-  const downloadPDF = (song) => {
+const downloadPDF = (song) => {
   const doc = new jsPDF();
 
-  doc.setFont("courier");
-  doc.setFontSize(12);
+  doc.setTextColor(93, 1, 174);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(24);
+  doc.text("TABIFYAI", 105, 20, { align: "center" });
 
-  doc.text("TabifyAI Generated Guitar Tabs", 10, 15);
-  doc.text(`File: ${song.fileName}`, 10, 25);
+  doc.setDrawColor(93, 1, 174);
+  doc.line(20, 30, 190, 30);
 
-  const lines = song.tabs.split("\n");
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text("Song:", 20, 45);
 
-  doc.text(lines, 10, 40);
+  doc.setFont("helvetica", "normal");
+  doc.text(song.fileName || "Untitled Song", 40, 45);
 
-  doc.save(`${song.fileName}-tabs.pdf`);
+  doc.setDrawColor(93, 1, 174);
+  doc.line(20, 55, 190, 55);
+
+  doc.setTextColor(93, 1, 174);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("GUITAR TABS", 20, 70);
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("courier", "normal");
+  doc.setFontSize(9);
+
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginLeft = 20;
+  const lineHeight = 5;
+  const blockGap = 6;
+  const tabLines = song.tabs.split("\n").filter((line) => line.trim() !== "");
+  const stringsPerBlock = 6;
+  const charsPerLine = 70;
+
+  let y = 85;
+
+  for (let i = 0; i < tabLines.length; i += stringsPerBlock) {
+    const group = tabLines.slice(i, i + stringsPerBlock);
+    const maxLength = Math.max(...group.map((line) => line.length));
+
+    for (let start = 0; start < maxLength; start += charsPerLine) {
+      if (y + stringsPerBlock * lineHeight > pageHeight - 20) {
+        doc.addPage();
+        y = 20;
+      }
+
+      group.forEach((line) => {
+        const part = line.substring(start, start + charsPerLine);
+        doc.text(part, marginLeft, y);
+        y += lineHeight;
+      });
+
+      y += blockGap;
+    }
+  }
+
+  doc.save(`${song.fileName || "TabifyAI"}-tabs.pdf`);
 };
-
 const deleteSong = async (songId) => {
-  const confirmDelete = window.confirm("Delete this song?");
+  const result = await Swal.fire({
+    title: "Delete Song?",
+    text: "This action cannot be undone.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+  });
 
-  if (!confirmDelete) return;
+  if (!result.isConfirmed) return;
 
   const token = localStorage.getItem("token");
 
@@ -65,14 +120,26 @@ const deleteSong = async (songId) => {
       setSongs((prevSongs) =>
         prevSongs.filter((song) => song.id !== songId)
       );
-    } else {
-      alert(data.message);
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Song deleted successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   } catch (err) {
     console.log(err);
-    alert("Failed to delete song");
+
+    Swal.fire({
+      icon: "error",
+      title: "Oops!",
+      text: "Failed to delete song.",
+    });
   }
 };
+
   return (
     <div className="results-card">
       <h2>My Songs</h2>
@@ -80,10 +147,7 @@ const deleteSong = async (songId) => {
       {songs.length === 0 ? (
         <div className="empty-history">
           <p>You haven't uploaded any songs yet.</p>
-          <button
-            className="upload-button"
-            onClick={() => setScreen("upload")}
-          >
+          <button className="upload-button" onClick={() => setScreen("upload")}>
             Upload a Song
           </button>
         </div>
@@ -95,17 +159,17 @@ const deleteSong = async (songId) => {
             <button className="download-button" onClick={() => downloadPDF(song)}>
               Download PDF
               </button>
+
               <button className="download-button" onClick={() => deleteSong(song.id)}>
                 Delete Song
                 </button>
-            <pre className="tabs-display">
-              {song.tabs}
-            </pre>
+
+            <pre className="tabs-display">{song.tabs}</pre>
+
           </div>
         ))
       )}
     </div>
   );
 }
-
 export default History;

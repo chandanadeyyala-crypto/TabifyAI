@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import toast from "react-hot-toast"
 function Signup({ setScreen }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,14 +20,14 @@ function Signup({ setScreen }) {
       const data = await res.json();
 
       if (data.status === "success") {
-        alert("Account created successfully!");
+        toast.success("Account created successfully!");
         setScreen("login");
       } else {
-        alert(data.message);
+        toast(data.message);
       }
     } catch (err) {
       console.log(err);
-      alert("Signup failed");
+      toast.error("Signup failed");
     }
   };
 
@@ -35,24 +35,13 @@ function Signup({ setScreen }) {
     <div className="upload-card">
       <h2>Create Account</h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+      <input type="email" placeholder="Email" value={email} onChange={(e) => 
+        setEmail(e.target.value)}/>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <input type="password" placeholder="Password" value={password}
+        onChange={(e) => setPassword(e.target.value)} />
 
-      <button
-        className="upload-button"
-        onClick={handleSignup}
-      >
+      <button className="upload-button" onClick={handleSignup}>
         Sign Up
       </button>
     </div>

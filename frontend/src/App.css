@@ -84,8 +84,7 @@ body {
 }
 
 
-.upload-card,
-.results-card {
+.upload-card,.results-card {
   font-family: "ClashGrotesk", sans-serif;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -142,9 +141,7 @@ body {
 }
 
 
-.upload-button,
-.upload-another-btn,
-.download-button {
+.upload-button,.upload-another-btn,.download-button {
   background: linear-gradient(to right, #5d01ae, #8a03a9);
   border: solid black 1px;
   border-radius: 10px;
@@ -158,9 +155,7 @@ body {
   font-family: "ClashDisplay", sans-serif;
 }
 
-.upload-button:hover,
-.upload-another-btn:hover,
-.download-button:hover {
+.upload-button:hover,.upload-another-btn:hover,.download-button:hover {
   background: linear-gradient(to right, #8a03a9, #5d01ae);
   transform: translateX(-2px) translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
@@ -234,8 +229,8 @@ body {
   overflow-y: auto;
   white-space: pre;
   font-family: monospace;
-  background: #111;
-  color: #00ff88;
+  background: #fffeff;
+  color: #1b002e;
   padding: 20px;
   border-radius: 12px;
   text-align: left;
@@ -290,13 +285,7 @@ body {
     font-size: 14px;
   }
 
-  .nav-buttons {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .upload-card,
-  .results-card {
+  .upload-card,.results-card {
     width: 100%;
     padding: 24px;
     border-radius: 16px;
@@ -336,17 +325,14 @@ body {
     padding: 14px;
   }
 
-  .download-button,
-  .upload-another-btn,
-  .upload-button {
+  .download-button,.upload-another-btn,.upload-button {
     width: 100%;
     font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
-  .upload-card,
-  .results-card {
+  .upload-card,.results-card {
     padding: 18px;
   }
 
@@ -375,7 +361,6 @@ body {
 }
 
 @media (max-width: 768px) {
-
   .navbar {
     position: relative;
     flex-direction: row;
@@ -402,20 +387,46 @@ body {
   }
 
   .nav-buttons {
-    display: none;
+    display: flex;
     position: absolute;
     top: 70px;
     right: 0;
+    flex-direction: column;
+    width: 180px;
+    padding: 0 12px;
+
     background: rgba(22, 8, 32, 0.97);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 14px;
-    padding: 12px;
-    flex-direction: column;
-    width: 180px;
     z-index: 100;
+
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(-10px);
+    pointer-events: none;
+
+    transition:
+      max-height 0.35s ease,
+      opacity 0.25s ease,
+      transform 0.35s ease,
+      padding 0.35s ease;
   }
 
   .nav-buttons.show {
-    display: flex;
+    max-height: 240px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    padding: 12px;
   }
+}
+
+.footer {
+  margin-top: auto;
+  padding: 20px 0;
+  text-align: center;
+  font-family: "ClashGrotesk", sans-serif;
+  font-size: 14px;
+  opacity: 0.8;
 }

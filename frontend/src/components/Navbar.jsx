@@ -2,9 +2,7 @@ import { useState } from "react";
 
 function Navbar({ title, setScreen, screen, isLoggedIn, setIsLoggedIn }) {
   const [menuOpen, setMenuOpen] = useState(false);
-
-
-const logout = () => {
+  const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 
@@ -24,18 +22,15 @@ const logout = () => {
         <p>Convert your audio recordings into guitar tabs</p>
       </div>
 
-        <button
-        className="menu-btn"
-        onClick={() => setMenuOpen(!menuOpen)}
-      >
-        ☰
-      </button>
+        <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+          </button>
 
 
- <div className={`nav-buttons ${menuOpen ? "show" : ""}`}>
-  {!isLoggedIn ? (
-    <>
-      {screen !== "upload" && (
+    <div className={`nav-buttons ${menuOpen ? "show" : ""}`}>
+      {!isLoggedIn ? (
+        <>
+        {screen !== "upload" && (
         <button className="nav-btn" onClick={() => goTo("upload")}>
           Go Back
         </button>
