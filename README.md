@@ -2,6 +2,9 @@
 
 AI-powered full-stack web app that converts uploaded audio recordings into guitar tablature.
 
+
+> Note: Full AI processing works locally. Cloud deployment requires a higher-memory backend instance.
+
 ## Tech Stack
 - React + Vite
 - FastAPI
@@ -41,4 +44,4 @@ The backend was deployed on Render and the frontend was deployed on Vercel. Auth
 
 However, the full AI processing pipeline using Demucs and Basic Pitch requires more RAM than Render’s free instance provides. During deployment testing, the backend exceeded the 512 MB memory limit. Therefore, the full AI tab-generation pipeline is intended to run locally or on a higher-memory server.
 
-> Note: Full AI processing works locally. Cloud deployment requires a higher-memory backend instance.
+
