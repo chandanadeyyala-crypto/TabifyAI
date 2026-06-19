@@ -2,8 +2,17 @@
 
 AI-powered full-stack web app that converts uploaded audio recordings into guitar tablature.
 
-
 > Note: Full AI processing works locally. Cloud deployment requires a higher-memory backend instance.
+
+## Live Demo
+
+Frontend: https://tabify-ai.vercel.app
+
+Backend Docs: https://tabifyai.onrender.com/docs
+
+## Demo video
+https://github.com/user-attachments/assets/2791b89d-e808-49be-9d31-a5b8c7ffc896
+
 
 ## Tech Stack
 - React + Vite
@@ -29,13 +38,17 @@ AI-powered full-stack web app that converts uploaded audio recordings into guita
 ## Running Locally
 
 ### Backend
-cd backend
+cd backend 
+
 .\.venv311\Scripts\Activate.ps1
+
 uvicorn main:app --reload
 
 ### Frontend
 cd frontend
+
 npm install
+
 npm run dev
 
 ## Deployment Status
