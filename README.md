@@ -1,6 +1,6 @@
 # TabifyAI
 
-AI-powered full-stack web app that converts uploaded audio recordings into guitar tablature.
+An AI-powered fullstack web application designed to isolate guitar tracks from audio recordings and transcribe them directly into guitar tablature.
 
 > Note: Full AI processing works locally. Cloud deployment requires a higher-memory backend instance.
 
@@ -12,7 +12,6 @@ Backend Docs: https://tabifyai.onrender.com/docs
 
 ## Demo video
 https://github.com/user-attachments/assets/2791b89d-e808-49be-9d31-a5b8c7ffc896
-
 
 ## Tech Stack
 - React + Vite
@@ -35,26 +34,42 @@ https://github.com/user-attachments/assets/2791b89d-e808-49be-9d31-a5b8c7ffc896
 - Download tabs as PDF
 - Responsive UI
 
-## Running Locally
-
-### Backend
-cd backend 
-
-.\.venv311\Scripts\Activate.ps1
-
-uvicorn main:app --reload
-
-### Frontend
-cd frontend
-
-npm install
-
-npm run dev
-
 ## Deployment Status
 
 The backend was deployed on Render and the frontend was deployed on Vercel. Authentication and API connectivity were configured successfully.
 
-However, the full AI processing pipeline using Demucs and Basic Pitch requires more RAM than Render’s free instance provides. During deployment testing, the backend exceeded the 512 MB memory limit. Therefore, the full AI tab-generation pipeline is intended to run locally or on a higher-memory server.
+The frontend is live on Vercel and the database routes function via Render. However, running deep learning models like Demucs and Basic Pitch requires heavy RAM usage that exceeds free cloud hosting tiers (e.g., Render's 512MB limit). For full transcription processing, please run the application locally using the steps below.
+
+## Backend Setup
+
+# Navigate to backend directory
+cd backend
+
+# Create and activate your virtual environment
+python -m venv venv
+
+# Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+# Mac/Linux
+source venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# Start the local development server
+uvicorn main:app --reload
+
+## Frontend Setup
+
+# Navigate to frontend directory
+cd ../frontend
+
+# Install node packages
+npm install
+
+# Start the development server
+npm run dev
+
+
 
 
